@@ -10,9 +10,20 @@ from sqlalchemy import text
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# CORS (para frontend en 5500)
+CORS(
+    app,
+    resources={r"/api/*": {"origins": [
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:5501",
+        "http://127.0.0.1:5501",
+    ]}},
+    supports_credentials=True,
+)
+
 db.init_app(app)
 JWTManager(app)
-CORS(app)
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(promotions_bp, url_prefix="/api")
@@ -46,10 +57,12 @@ def ensure_users_schema_updates():
     if alter_statements:
         db.session.commit()
 
+
 with app.app_context():
     db.create_all()
     ensure_users_schema_updates()
     print("✅ Base de datos lista")
 
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

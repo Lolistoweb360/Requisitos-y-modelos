@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Home - BITE-NOW</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <div>
+        <h2 id="welcome">Promociones</h2>
+        <p class="subtitle" id="subtitle">Cargando...</p>
+      </div>
+      <button class="btn-outline" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <div id="promotions" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;"></div>
+  </div>
+
+  <button onclick="window.location.href='create_promotion.html'">Crear promoción</button>
+
+  <script src="home.js"></script>
+</body>
+</html>

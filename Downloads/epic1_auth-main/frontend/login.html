@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    const API = "http://localhost:5000/api/auth";
+   const API = "http://127.0.0.1:5001/api/auth";
 
     async function login() {
         const email    = document.getElementById("email").value.trim();
@@ -53,6 +53,7 @@
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
                 showMsg(`¡Bienvenido, ${data.user.name}!`, "success");
+                setTimeout(() => window.location.href = "home.html", 800);
             } else {
                 showMsg(data.error || "Credenciales incorrectas", "error");
             }
