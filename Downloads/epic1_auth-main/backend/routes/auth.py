@@ -10,6 +10,8 @@ auth_bp = Blueprint("auth", __name__)
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+ROLE_OPTIONS = {"USER", "RESTAURANT"}
+
 
 def _is_strong_password(password, min_length):
     if len(password) < min_length:
@@ -28,12 +30,16 @@ def register():
     age_raw  = str(data.get("age", "")).strip()
     email    = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
+    role_raw = str(data.get("role", "USER")).strip().upper()
 
     if not name or not email or not password:
         return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
     if not EMAIL_REGEX.match(email):
         return jsonify({"error": "Formato de correo inválido"}), 400
+
+    if role_raw not in ROLE_OPTIONS:
+        return jsonify({"error": "Rol inválido"}), 400
 
     age = None
     if age_raw:
@@ -51,7 +57,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "El correo ya está registrado"}), 409
 
-    user = User(name=name, age=age, email=email)
+    user = User(name=name, age=age, email=email, role=role_raw)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
