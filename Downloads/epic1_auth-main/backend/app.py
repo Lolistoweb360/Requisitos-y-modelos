@@ -4,6 +4,7 @@ from flask_cors import CORS
 from config import Config
 from models import db
 from routes.auth import auth_bp
+from routes.promotions import promotions_bp
 from sqlalchemy import text
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ JWTManager(app)
 CORS(app)
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(promotions_bp, url_prefix="/api")
 
 
 def ensure_users_schema_updates():
@@ -30,6 +32,8 @@ def ensure_users_schema_updates():
         alter_statements.append("ALTER TABLE users ADD COLUMN lock_until DATETIME")
     if "is_active" not in existing:
         alter_statements.append("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT 1")
+    if "role" not in existing:
+        alter_statements.append("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'USER'")
 
     for statement in alter_statements:
         db.session.execute(text(statement))
