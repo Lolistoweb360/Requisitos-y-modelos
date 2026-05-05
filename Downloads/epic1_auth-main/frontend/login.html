@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BITE-NOW</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Login to discover great deals</p>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password">
+    </div>
+
+    <button class="btn-primary" onclick="login()">Login</button>
+    <div id="msg" class="msg"></div>
+
+    <div class="links">
+        Don't have an account? <a href="register.html">Register here</a><br><br>
+        <a href="forgot_password.html">Forgot your password?</a>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:5000/api/auth";
+
+    async function login() {
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!email || !password) { showMsg("Correo y contraseña son obligatorios", "error"); return; }
+        if (!/^\S+@\S+\.\S+$/.test(email)) { showMsg("Credenciales incorrectas", "error"); return; }
+
+        try {
+            const res  = await fetch(`${API}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                showMsg(`¡Bienvenido, ${data.user.name}!`, "success");
+            } else {
+                showMsg(data.error || "Credenciales incorrectas", "error");
+            }
+        } catch {
+            showMsg("Error al conectar con el servidor", "error");
+        }
+    }
+
+    function showMsg(text, type) {
+        const el = document.getElementById("msg");
+        el.textContent = text;
+        el.className = `msg ${type}`;
+    }
+</script>
+</body>
+</html>

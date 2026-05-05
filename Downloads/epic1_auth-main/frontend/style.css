@@ -1,0 +1,184 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #F2F2F2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ── SPLASH ── */
+.splash {
+    background: #E8384F;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+.splash-icon {
+    background: white;
+    border-radius: 24px;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.splash h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.splash p {
+    color: rgba(255,255,255,0.85);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.splash-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 380px;
+}
+
+.btn-white {
+    width: 100%;
+    padding: 1rem;
+    background: white;
+    color: #E8384F;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-white:hover { opacity: 0.9; }
+
+.btn-outline {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+/* ── CARD FORMULARIOS ── */
+.screen {
+    background: #F2F2F2;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    max-width: 480px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #222;
+    margin-bottom: 2rem;
+    padding: 0;
+    width: auto;
+}
+
+.back-btn:hover { background: none; color: #E8384F; }
+
+.screen h2 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 0.4rem;
+}
+
+.screen .subtitle {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.form-group { margin-bottom: 1.2rem; }
+
+label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    background: #EBEBEB;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    color: #333;
+    transition: background 0.2s;
+}
+
+input::placeholder { color: #aaa; }
+input:focus { outline: none; background: #e0e0e0; }
+
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: #E8384F;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover { background: #cf2e43; }
+
+.msg {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.msg.success { background: #d1fae5; color: #065f46; display: block; }
+.msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+
+.links {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.links a { color: #E8384F; text-decoration: none; font-weight: 600; }
+.links a:hover { text-decoration: underline; }

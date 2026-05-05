@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - BITE-NOW</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="screen">
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+
+    <h2>Create Account</h2>
+    <p class="subtitle">Join BITE-NOW and discover amazing deals</p>
+
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Enter your full name">
+    </div>
+    <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="Must be 15+" min="15">
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create a secure password (8+, 1 Uppercase, 1 number)" minlength="8">
+    </div>
+
+    <button class="btn-primary" onclick="register()">Create Account</button>
+    <div id="msg" class="msg"></div>
+
+    <div class="links">
+        Already have an account? <a href="login.html">Login here</a>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:5000/api/auth";
+
+    async function register() {
+        const name     = document.getElementById("name").value.trim();
+        const age      = document.getElementById("age").value.trim();
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!name || !age || !email || !password) {
+            showMsg("Todos los campos son obligatorios", "error"); return;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            showMsg("Formato de correo inválido", "error"); return;
+        }
+        if (parseInt(age) < 15) {
+            showMsg("Debes tener al menos 15 años", "error"); return;
+        }
+        if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+            showMsg("La contraseña debe tener 8+ caracteres, una mayúscula y un número", "error"); return;
+        }
+
+        try {
+            const res  = await fetch(`${API}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, age: parseInt(age), email, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg("¡Cuenta creada! Redirigiendo...", "success");
+                setTimeout(() => window.location.href = "login.html", 2000);
+            } else {
+                showMsg(data.error, "error");
+            }
+        } catch {
+            showMsg("Error al conectar con el servidor", "error");
+        }
+    }
+
+    function showMsg(text, type) {
+        const el = document.getElementById("msg");
+        el.textContent = text;
+        el.className = `msg ${type}`;
+    }
+</script>
+</body>
+</html>
