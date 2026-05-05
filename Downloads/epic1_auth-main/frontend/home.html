@@ -1,28 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home - BITE-NOW</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Home</title>
+  <link rel="stylesheet" href="app.css"/>
+  <link rel="icon" href="data:,">
 </head>
 <body>
-  <div class="screen">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-      <div>
-        <h2 id="welcome">Promociones</h2>
-        <p class="subtitle" id="subtitle">Cargando...</p>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">BITE-NOW</div>
+      <div class="right">
+        <div class="pill" id="who">...</div>
+        <button class="btn-outline" onclick="window.location.href='create_promotion.html'">Publicar promoción</button>
+        <button class="btn-outline" onclick="window.location.href='reserve.html'">Reservar</button>
+        <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
       </div>
-      <button class="btn-outline" onclick="logout()">Logout</button>
     </div>
 
-    <div id="msg" class="msg"></div>
+    <div class="grid">
+      <div class="card">
+        <h2 id="welcome">Home</h2>
+        <p id="subtitle">Aquí irá el listado de promociones cuando esté listo el endpoint de “ver”.</p>
+        <div class="hr"></div>
+        <p class="small">
+          Por ahora puedes:
+          <br/>• Publicar promociones (rol RESTAURANT)
+          <br/>• Reservar por <b>promotion_id</b> (modo manual)
+        </p>
+      </div>
 
-    <div id="promotions" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;"></div>
+      <div class="card">
+        <h2>Estado</h2>
+        <p class="small">Si te piden demo: crea promo, copia el <code>id</code> y reserva desde “Reservar”.</p>
+        <div id="msg" class="msg"></div>
+      </div>
+    </div>
   </div>
 
-  <button onclick="window.location.href='create_promotion.html'">Crear promoción</button>
-
-  <script src="home.js"></script>
+  <script src="common.js"></script>
+  <script>
+    requireAuth();
+    const u = getUser();
+    document.getElementById("welcome").textContent = `Hola, ${u?.name || "usuario"}!`;
+    document.getElementById("who").textContent = u?.role ? `Rol: ${u.role}` : "Sesión";
+    showMsg("msg", "Listo. Publica una promo y luego resérvala con su ID.", "success");
+  </script>
 </body>
 </html>
