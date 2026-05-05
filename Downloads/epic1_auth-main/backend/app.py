@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from config import Config
@@ -16,6 +16,11 @@ CORS(app)
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(promotions_bp, url_prefix="/api")
+
+
+@app.route("/")
+def health_check():
+    return jsonify({"status": "ok", "message": "Bite-Now API running"}), 200
 
 
 def ensure_users_schema_updates():
