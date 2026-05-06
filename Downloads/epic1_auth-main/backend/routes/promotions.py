@@ -162,7 +162,7 @@ def create_promotion():
     name = str(data.get("name", "")).strip()
     description = str(data.get("description", "")).strip()
 
-     price_raw = data.get("price")
+    price_raw = data.get("price")
     stock_raw = data.get("stock")
     image_url = str(data.get("image_url", "")).strip() or None
     # Accept valid_until or end_date as alias
@@ -195,7 +195,7 @@ def create_promotion():
          stock = int(stock_raw)
     except (ValueError, TypeError):
         return jsonify({"error": "Stock inválido: debe ser un entero"}), 400
-     if stock <= 0:
+    if stock <= 0:
         return jsonify({"error": "Stock debe ser mayor que 0"}), 400
 
     if image_url and not _is_valid_image_url(image_url):
@@ -237,14 +237,14 @@ def create_promotion():
         restaurant_id=user.id,
         status="ACTIVE",
     )
-     if hasattr(promotion, "lat"):
+    if hasattr(promotion, "lat"):
         promotion.lat = lat
     if hasattr(promotion, "lng"):
         promotion.lng = lng
 
     db.session.add(promotion)
     db.session.commit()
-     return jsonify(_promotion_to_dict(promotion)), 201
+    return jsonify(_promotion_to_dict(promotion)), 201
 
 
 # US-08 - Reservar por ruta /promotions/<id>/reserve
@@ -253,12 +253,7 @@ def create_promotion():
 def reserve_promotion(promotion_id):
     user_id = get_jwt_identity()
     return _do_reserve(user_id, promotion_id)
-# US-08 - Reservar (endpoint original - mantener compatibilidad)
-@promotions_bp.route("/promotions/<promotion_id>/reserve", methods=["POST"])
-@jwt_required()
-def reserve_promotion(promotion_id):
-    user_id = get_jwt_identity()
-    return _do_reserve(user_id, promotion_id)
+
 # US-08 - Reservar (endpoint original - mantener compatibilidad)
 @promotions_bp.route("/reservations", methods=["POST"])
 @jwt_required()
