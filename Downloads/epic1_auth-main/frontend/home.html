@@ -13,9 +13,13 @@
       <div class="brand">BITE-NOW</div>
       <div class="right">
         <div class="pill" id="who">...</div>
-        <button class="btn-outline" onclick="window.location.href='promotions.html'">Ver Promociones</button>
+
+        <!-- Se oculta "Ver Promociones" para no pisar el trabajo del compañero -->
+        <!-- <button class="btn-outline" onclick="window.location.href='promotions.html'">Ver Promociones</button> -->
+
         <button class="btn-outline" id="publish-btn" style="display:none"
                 onclick="window.location.href='publish_promotion.html'">Publicar Promoción</button>
+
         <button class="btn-outline" onclick="window.location.href='reserve.html'">Reservar por ID</button>
         <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
       </div>
@@ -24,12 +28,21 @@
     <div class="grid">
       <div class="card">
         <h2 id="welcome">Home</h2>
-        <p id="subtitle">Bienvenido a BITE-NOW. Explora las promociones disponibles o publica las tuyas.</p>
+        <p id="subtitle">Bienvenido a BITE-NOW. Publica promociones o reserva con un ID.</p>
         <div class="hr"></div>
+
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+          <!-- Se oculta el CTA grande de "Ver y Reservar Promociones" -->
+          <!--
           <button class="btn" onclick="window.location.href='promotions.html'">
             🏷️ Ver y Reservar Promociones
           </button>
+          -->
+
+          <button class="btn" onclick="window.location.href='reserve.html'">
+            🎟️ Reservar promoción por ID
+          </button>
+
           <button class="btn-outline" id="home-publish-btn" style="display:none"
                   onclick="window.location.href='publish_promotion.html'">
             ✏️ Publicar Nueva Promoción
@@ -40,9 +53,8 @@
       <div class="card">
         <h2>Estado</h2>
         <p class="small">
-          • <b>Ver Promociones</b>: lista activas, reserva con un clic y consulta tus cupones.<br/><br/>
-          • <b>Publicar</b> (rol RESTAURANT): crea nuevas promociones con precio, stock y fecha.<br/><br/>
-          • <b>Reservar por ID</b>: modo manual si conoces el ID de la promoción.
+          • <b>Publicar</b> (rol RESTAURANT): crea nuevas promociones con precio, stock y vigencia.<br/><br/>
+          • <b>Reservar por ID</b>: pega el ID de la promoción para generar tu cupón.
         </p>
         <div id="msg" class="msg"></div>
       </div>
@@ -59,7 +71,7 @@
       document.getElementById("publish-btn").style.display = "";
       document.getElementById("home-publish-btn").style.display = "";
     }
-    showMsg("msg", "Sesión activa. ¡Explora las promociones!", "success");
+    showMsg("msg", "Sesión activa.", "success");
   </script>
 </body>
 </html>
