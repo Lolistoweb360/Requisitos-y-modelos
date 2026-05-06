@@ -1,0 +1,6 @@
+#!/Users/davidorozco/Downloads/Requisitos-y-modelos-main/Downloads/epic1_auth-main/frontend/venv/bin/python3.12
+import sys
+from pip._internal.cli.main import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())
