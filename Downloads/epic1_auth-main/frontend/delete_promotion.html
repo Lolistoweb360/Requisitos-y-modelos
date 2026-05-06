@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eliminar Promoción - BITE-NOW</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" href="data:,">
+  <style>
+    .preview-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.4rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .preview-card h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 0.8rem;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+    .info-row:last-of-type { border-bottom: none; }
+    .info-row span:first-child { color: #888; }
+    .info-row span:last-child  { font-weight: 700; color: #1a1a1a; }
+    .warning-box {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      font-size: 0.88rem;
+      color: #991b1b;
+      line-height: 1.5;
+    }
+    .btn-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .btn-secondary {
+      width: 100%;
+      padding: 1rem;
+      background: #EBEBEB;
+      color: #555;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #e0e0e0; }
+    .btn-delete {
+      width: 100%;
+      padding: 1rem;
+      background: #E8384F;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-delete:hover { background: #cf2e43; }
+    .badge {
+      padding: 4px 12px; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .badge-active   { background: #d1fae5; color: #065f46; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .badge-other    { background: #f3f4f6; color: #374151; }
+  </style>
+</head>
+<body>
+<div class="screen">
+  <button class="back-btn" onclick="window.location.href='home.html'">←</button>
+
+  <h2>Eliminar Promoción</h2>
+  <p class="subtitle">Solo rol <strong>RESTAURANT</strong>. Solo puedes eliminar tus propias promociones.</p>
+
+  <div class="form-group">
+    <label>ID de la promoción</label>
+    <input type="text" id="promotion_id" placeholder="Pega aquí el ID de la promoción"/>
+  </div>
+
+  <button class="btn-primary" onclick="previewPromotion()">Buscar promoción</button>
+  <div id="msg" class="msg"></div>
+
+  <div class="preview-card" id="preview">
+    <h3>Confirmar eliminación</h3>
+    <div class="info-row">
+      <span>Nombre</span>
+      <span id="pre-name"></span>
+    </div>
+    <div class="info-row">
+      <span>Estado</span>
+      <span id="pre-status-badge"></span>
+    </div>
+    <div class="info-row">
+      <span>ID</span>
+      <span style="font-size:0.75rem;color:#aaa;word-break:break-all;" id="pre-id"></span>
+    </div>
+    <div class="warning-box">
+      ⚠️ Esta acción no se puede deshacer.<br/>
+      Si existen reservas activas vinculadas, la promoción quedará <strong>cancelada</strong>.<br/>
+      Si no las hay, será <strong>eliminada permanentemente</strong>.
+    </div>
+    <div class="btn-actions">
+      <button class="btn-delete"    onclick="deletePromotion()">Sí, eliminar</button>
+      <button class="btn-secondary" onclick="cancelPreview()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:5001/api";
+
+  function showMsg(text, type) {
+    const el = document.getElementById("msg");
+    el.textContent = text;
+    el.className = `msg ${type}`;
+  }
+
+  function requireAuth() {
+    const token = localStorage.getItem("token");
+    if (!token) { window.location.href = "login.html"; return null; }
+    return token;
+  }
+
+  async function previewPromotion() {
+    const token = requireAuth();
+    if (!token) return;
+
+    const id = document.getElementById("promotion_id").value.trim();
+    if (!id) { showMsg("Por favor ingresa el ID de la promoción.", "error"); return; }
+
+    document.getElementById("preview").style.display = "none";
+    showMsg("Buscando...", "");
+
+    try {
+      const res  = await fetch(`${API}/promotions/${id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) { showMsg(data.error || `Error ${res.status}`, "error"); return; }
+
+      document.getElementById("pre-name").textContent = data.name;
+      document.getElementById("pre-id").textContent   = data.id;
+
+      const badge = document.getElementById("pre-status-badge");
+      badge.textContent = data.status;
+      badge.className   = data.status === "ACTIVE"    ? "badge badge-active"
+                        : data.status === "CANCELLED" ? "badge badge-inactive"
+                        : "badge badge-other";
+
+      showMsg("", "");
+      document.getElementById("preview").style.display = "block";
+    } catch {
+      showMsg("Error al conectar con el servidor.", "error");
+    }
+  }
+
+  async function deletePromotion() {
+    const token = requireAuth();
+    if (!token) return;
+
+    const id = document.getElementById("promotion_id").value.trim();
+    if (!id) return;
+
+    try {
+      const res  = await fetch(`${API}/promotions/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) { showMsg(data.error || `Error ${res.status}`, "error"); return; }
+
+      document.getElementById("preview").style.display = "none";
+      document.getElementById("promotion_id").value    = "";
+      showMsg(data.message || "Promoción eliminada correctamente.", "success");
+    } catch {
+      showMsg("Error al conectar con el servidor.", "error");
+    }
+  }
+
+  function cancelPreview() {
+    document.getElementById("preview").style.display = "none";
+    showMsg("", "");
+  }
+</script>
+</body>
+</html>

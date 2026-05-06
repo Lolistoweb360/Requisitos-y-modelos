@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ver Promoción - BITE-NOW</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" href="data:,">
+  <style>
+    .promo-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .promo-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #eee;
+    }
+    .promo-body { padding: 1.2rem 1.4rem 1.4rem; }
+    .promo-body h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 0.4rem;
+    }
+    .promo-desc {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .promo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+    .promo-row:last-child { border-bottom: none; }
+    .promo-row span:first-child { color: #888; font-weight: 500; }
+    .promo-row span:last-child  { color: #1a1a1a; font-weight: 700; }
+    .price-tag { font-size: 1.4rem; font-weight: 800; color: #E8384F; }
+    .badge {
+      padding: 4px 12px; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .badge-active   { background: #d1fae5; color: #065f46; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .badge-other    { background: #f3f4f6; color: #374151; }
+  </style>
+</head>
+<body>
+<div class="screen">
+  <button class="back-btn" onclick="window.location.href='home.html'">←</button>
+
+  <h2>Ver Promoción</h2>
+  <p class="subtitle">Consulta el detalle de una promoción</p>
+
+  <div class="form-group">
+    <label>ID de la promoción</label>
+    <input type="text" id="promotion_id" placeholder="Pega aquí el ID de la promoción"/>
+  </div>
+
+  <button class="btn-primary" onclick="getPromotion()">Buscar</button>
+  <div id="msg" class="msg"></div>
+
+  <div class="promo-card" id="result">
+    <img id="res-image" src="" alt="Imagen de la promoción"/>
+    <div class="promo-body">
+      <h3 id="res-name"></h3>
+      <p class="promo-desc" id="res-description"></p>
+      <div class="promo-row">
+        <span>Precio</span>
+        <span class="price-tag" id="res-price"></span>
+      </div>
+      <div class="promo-row">
+        <span>Stock disponible</span>
+        <span id="res-stock"></span>
+      </div>
+      <div class="promo-row">
+        <span>Estado</span>
+        <span id="res-status-badge"></span>
+      </div>
+      <div class="promo-row">
+        <span>Válida desde</span>
+        <span id="res-start"></span>
+      </div>
+      <div class="promo-row">
+        <span>Válida hasta</span>
+        <span id="res-end"></span>
+      </div>
+      <div class="promo-row">
+        <span>ID</span>
+        <span style="font-size:0.75rem;color:#aaa;word-break:break-all;" id="res-id"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:5001/api";
+
+  function showMsg(text, type) {
+    const el = document.getElementById("msg");
+    el.textContent = text;
+    el.className = `msg ${type}`;
+  }
+
+  function requireAuth() {
+    const token = localStorage.getItem("token");
+    if (!token) { window.location.href = "login.html"; return null; }
+    return token;
+  }
+
+  async function getPromotion() {
+    const token = requireAuth();
+    if (!token) return;
+
+    const id = document.getElementById("promotion_id").value.trim();
+    if (!id) { showMsg("Por favor ingresa el ID de la promoción.", "error"); return; }
+
+    document.getElementById("result").style.display = "none";
+    showMsg("Buscando...", "");
+
+    try {
+      const res  = await fetch(`${API}/promotions/${id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) { showMsg(data.error || `Error ${res.status}`, "error"); return; }
+
+      document.getElementById("res-id").textContent          = data.id;
+      document.getElementById("res-name").textContent        = data.name;
+      document.getElementById("res-description").textContent = data.description;
+      document.getElementById("res-price").textContent       = `$${parseFloat(data.price).toFixed(2)}`;
+      document.getElementById("res-stock").textContent       = data.stock;
+      document.getElementById("res-start").textContent       = new Date(data.start_date).toLocaleDateString("es-CO");
+      document.getElementById("res-end").textContent         = new Date(data.end_date).toLocaleDateString("es-CO");
+      document.getElementById("res-image").src               = data.image_url;
+
+      const badge = document.getElementById("res-status-badge");
+      badge.textContent = data.status;
+      badge.className   = data.status === "ACTIVE"    ? "badge badge-active"
+                        : data.status === "CANCELLED" ? "badge badge-inactive"
+                        : "badge badge-other";
+
+      showMsg("", "");
+      document.getElementById("result").style.display = "block";
+    } catch {
+      showMsg("Error al conectar con el servidor.", "error");
+    }
+  }
+</script>
+</body>
+</html>

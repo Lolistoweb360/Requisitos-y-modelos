@@ -143,3 +143,91 @@ def create_reservation():
     except Exception:
         db.session.rollback()
         return jsonify({"error": "Ocurrió un error al reservar"}), 500
+
+
+# US-09 - Ver (consultar) una promoción
+@promotions_bp.route("/promotions/<string:promotion_id>", methods=["GET"])
+@jwt_required()
+def get_promotion(promotion_id):
+    """
+    Retorna los detalles de una promoción por su ID.
+    - Cualquier usuario autenticado puede consultar una promoción.
+    - Si la promoción no existe, responde 404.
+    """
+    if not promotion_id or not promotion_id.strip():
+        return jsonify({"error": "ID de promoción inválido"}), 400
+
+    promotion = Promotion.query.get(promotion_id.strip())
+
+    if not promotion:
+        return jsonify({"error": "Promoción no encontrada"}), 404
+
+    return jsonify({
+        "id":            promotion.id,
+        "name":          promotion.name,
+        "description":   promotion.description,
+        "price":         float(promotion.price),
+        "stock":         promotion.stock,
+        "image_url":     promotion.image_url,
+        "start_date":    promotion.start_date.isoformat(),
+        "end_date":      promotion.end_date.isoformat(),
+        "restaurant_id": promotion.restaurant_id,
+        "status":        promotion.status,
+        "created_at":    promotion.created_at.isoformat(),
+        "updated_at":    promotion.updated_at.isoformat(),
+    }), 200
+
+
+# US-10 - Eliminar una promoción
+@promotions_bp.route("/promotions/<string:promotion_id>", methods=["DELETE"])
+@jwt_required()
+def delete_promotion(promotion_id):
+    """
+    Elimina (o desactiva) una promoción existente.
+    - Solo el restaurante dueño de la promoción puede eliminarla.
+    - Si hay reservas activas vinculadas, la promoción se marca como CANCELLED
+      en lugar de borrarse físicamente, para preservar la integridad referencial.
+    - Si no tiene reservas activas, se elimina físicamente de la BD.
+    """
+    if not promotion_id or not promotion_id.strip():
+        return jsonify({"error": "ID de promoción inválido"}), 400
+
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    # Solo restaurantes pueden eliminar promociones
+    if not _require_restaurant(user):
+        return jsonify({"error": "No autorizado"}), 403
+
+    promotion = Promotion.query.get(promotion_id.strip())
+
+    if not promotion:
+        return jsonify({"error": "Promoción no encontrada"}), 404
+
+    # El restaurante solo puede eliminar sus propias promociones
+    if promotion.restaurant_id != user.id:
+        return jsonify({"error": "No tienes permiso para eliminar esta promoción"}), 403
+
+    # Verificar si existen reservas activas asociadas
+    active_reservations = Reservation.query.filter_by(
+        promotion_id=promotion.id,
+        status="ACTIVE"
+    ).count()
+
+    if active_reservations > 0:
+        # Soft delete: marcar como CANCELLED para conservar integridad referencial
+        promotion.status = "CANCELLED"
+        db.session.commit()
+        return jsonify({
+            "message": "Promoción cancelada. Existen reservas activas vinculadas.",
+            "id":     promotion.id,
+            "status": promotion.status,
+        }), 200
+    else:
+        # Hard delete: no hay reservas activas, se puede borrar físicamente
+        db.session.delete(promotion)
+        db.session.commit()
+        return jsonify({
+            "message": "Promoción eliminada correctamente.",
+            "id": promotion_id,
+        }), 200
