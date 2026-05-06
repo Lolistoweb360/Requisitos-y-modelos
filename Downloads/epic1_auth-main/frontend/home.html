@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Home</title>
+  <title>Home – BITE-NOW</title>
   <link rel="stylesheet" href="app.css"/>
   <link rel="icon" href="data:,">
 </head>
@@ -13,8 +13,10 @@
       <div class="brand">BITE-NOW</div>
       <div class="right">
         <div class="pill" id="who">...</div>
-        <button class="btn-outline" onclick="window.location.href='create_promotion.html'">Publicar promoción</button>
-        <button class="btn-outline" onclick="window.location.href='reserve.html'">Reservar</button>
+        <button class="btn-outline" onclick="window.location.href='promotions.html'">Ver Promociones</button>
+        <button class="btn-outline" id="publish-btn" style="display:none"
+                onclick="window.location.href='publish_promotion.html'">Publicar Promoción</button>
+        <button class="btn-outline" onclick="window.location.href='reserve.html'">Reservar por ID</button>
         <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -22,18 +24,26 @@
     <div class="grid">
       <div class="card">
         <h2 id="welcome">Home</h2>
-        <p id="subtitle">Aquí irá el listado de promociones cuando esté listo el endpoint de “ver”.</p>
+        <p id="subtitle">Bienvenido a BITE-NOW. Explora las promociones disponibles o publica las tuyas.</p>
         <div class="hr"></div>
-        <p class="small">
-          Por ahora puedes:
-          <br/>• Publicar promociones (rol RESTAURANT)
-          <br/>• Reservar por <b>promotion_id</b> (modo manual)
-        </p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+          <button class="btn" onclick="window.location.href='promotions.html'">
+            🏷️ Ver y Reservar Promociones
+          </button>
+          <button class="btn-outline" id="home-publish-btn" style="display:none"
+                  onclick="window.location.href='publish_promotion.html'">
+            ✏️ Publicar Nueva Promoción
+          </button>
+        </div>
       </div>
 
       <div class="card">
         <h2>Estado</h2>
-        <p class="small">Si te piden demo: crea promo, copia el <code>id</code> y reserva desde “Reservar”.</p>
+        <p class="small">
+          • <b>Ver Promociones</b>: lista activas, reserva con un clic y consulta tus cupones.<br/><br/>
+          • <b>Publicar</b> (rol RESTAURANT): crea nuevas promociones con precio, stock y fecha.<br/><br/>
+          • <b>Reservar por ID</b>: modo manual si conoces el ID de la promoción.
+        </p>
         <div id="msg" class="msg"></div>
       </div>
     </div>
@@ -45,7 +55,11 @@
     const u = getUser();
     document.getElementById("welcome").textContent = `Hola, ${u?.name || "usuario"}!`;
     document.getElementById("who").textContent = u?.role ? `Rol: ${u.role}` : "Sesión";
-    showMsg("msg", "Listo. Publica una promo y luego resérvala con su ID.", "success");
+    if (u?.role === "RESTAURANT") {
+      document.getElementById("publish-btn").style.display = "";
+      document.getElementById("home-publish-btn").style.display = "";
+    }
+    showMsg("msg", "Sesión activa. ¡Explora las promociones!", "success");
   </script>
 </body>
 </html>
