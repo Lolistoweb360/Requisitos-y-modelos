@@ -84,26 +84,20 @@ textarea{ min-height:96px; resize:vertical; }
 .btn-danger{ background: rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35); color:#ffd1d1; }
 
 .msg{ margin-top:12px; padding:10px 12px; border-radius:12px; display:none; }
-/* Mensajes en tema blanco + rojo */
-.msg{
-  margin-top:12px;
-  padding:10px 12px;
-  border-radius:12px;
-  display:none;
-}
+
 
 .msg.success{
   display:block;
-  background: rgba(5,150,105,.08);          /* verde suave */
+  background: rgba(5,150,105,.08);       
   border:1px solid rgba(5,150,105,.25);
-  color:#064e3b;                             /* verde oscuro legible */
+  color:#064e3b;
 }
 
 .msg.error{
   display:block;
-  background: rgba(239,68,68,.08);           /* rojo suave */
+  background: rgba(239,68,68,.08);
   border:1px solid rgba(239,68,68,.25);
-  color:#7f1d1d;                             /* rojo oscuro legible */
+  color:#7f1d1d;
 }
 
 .small{ font-size:13px; color:var(--muted); }

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Publicar Promoción – BITE-NOW</title>
+  <link rel="stylesheet" href="app.css"/>
+  <link rel="icon" href="data:,">
+  <style>
+    label.small { display:block; margin-bottom:4px; font-weight:600; color:#7f1d1d; }
+    .field { margin-top:14px; }
+    .img-preview {
+      width:100%; max-height:170px; object-fit:cover;
+      border-radius:12px; margin-top:10px; display:none;
+      border:1px solid rgba(239,68,68,.28);
+    }
+    .char-counter { font-size:12px; color:var(--muted); text-align:right; margin-top:3px; }
+    .required { color:#dc2626; }
+    .denied {
+      background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3);
+      color:#7f1d1d; border-radius:14px; padding:16px 18px; margin-top:16px;
+      font-weight:600;
+    }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">Publicar Promoción</div>
+      <div class="right">
+        <div class="pill" id="who">...</div>
+        <button class="btn-outline" onclick="window.location.href='promotions.html'">Ver Promociones</button>
+        <button class="btn-outline" onclick="window.location.href='home.html'">Inicio</button>
+        <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="denied-msg" class="denied" style="display:none;">
+      ⛔ Acceso denegado. Solo usuarios con rol <b>RESTAURANT</b> pueden publicar promociones.
+    </div>
+
+    <div class="card" style="margin-top:16px;" id="form-card">
+      <h2>Nueva Promoción <span style="font-size:13px;color:var(--muted);">US-06</span></h2>
+      <p>Campos con <span class="required">*</span> son obligatorios.</p>
+
+      <fieldset id="form-fields" style="border:none;padding:0;margin:0;">
+        <div class="row">
+          <div class="field">
+            <label class="small" for="name">Nombre <span class="required">*</span></label>
+            <input id="name" placeholder="Ej. Combo 2x1 Hamburguesa" oninput="validate()"/>
+          </div>
+          <div class="field">
+            <label class="small" for="price">Precio <span class="required">*</span> ($)</label>
+            <input id="price" type="number" step="0.01" min="0.01" placeholder="9.99" oninput="validate()"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="small" for="description">Descripción <span class="required">*</span></label>
+          <textarea id="description" placeholder="Describe la promoción..." maxlength="300" oninput="onDescInput()"></textarea>
+          <div class="char-counter"><span id="desc-count">0</span>/300</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label class="small" for="stock">Stock <span class="required">*</span> (unidades)</label>
+            <input id="stock" type="number" step="1" min="1" placeholder="50" oninput="validate()"/>
+          </div>
+          <div class="field">
+            <label class="small" for="valid_until">Válido hasta <span class="required">*</span></label>
+            <input id="valid_until" type="datetime-local" oninput="validate()"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="small" for="image_url">URL de imagen (opcional)</label>
+          <input id="image_url" placeholder="https://ejemplo.com/imagen.jpg" oninput="onImgInput()"/>
+          <img id="img-preview" class="img-preview" alt="Vista previa de imagen"/>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; align-items:center;">
+          <button class="btn" id="submit-btn" onclick="createPromotion()" disabled>Publicar Promoción</button>
+          <span id="processing" style="display:none; color:var(--muted); font-size:13px;">Publicando…</span>
+        </div>
+      </fieldset>
+
+      <div id="msg" class="msg"></div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    requireAuth();
+    const u = getUser();
+    document.getElementById("who").textContent = u?.role ? `Rol: ${u.role}` : "Sesión";
+
+    // Set minimum datetime to now (local time)
+    const nowLocal = new Date();
+    nowLocal.setMinutes(nowLocal.getMinutes() - nowLocal.getTimezoneOffset());
+    document.getElementById("valid_until").min = nowLocal.toISOString().slice(0, 16);
+
+    // Role check
+    if (u && u.role !== "RESTAURANT") {
+      document.getElementById("denied-msg").style.display = "block";
+      document.getElementById("form-card").style.opacity = "0.5";
+      document.getElementById("form-fields").disabled = true;
+    }
+
+    function validate() {
+      const name  = document.getElementById("name").value.trim();
+      const price = parseFloat(document.getElementById("price").value);
+      const stock = parseInt(document.getElementById("stock").value);
+      const desc  = document.getElementById("description").value.trim();
+      const vu    = document.getElementById("valid_until").value;
+      const ok = name && desc && !isNaN(price) && price > 0 && !isNaN(stock) && stock > 0 && vu;
+      document.getElementById("submit-btn").disabled = !ok;
+    }
+
+    function onDescInput() {
+      const val = document.getElementById("description").value;
+      document.getElementById("desc-count").textContent = val.length;
+      validate();
+    }
+
+    function onImgInput() {
+      const url     = document.getElementById("image_url").value.trim();
+      const preview = document.getElementById("img-preview");
+      if (url && /^https?:\/\/.+\.(jpg|jpeg|png|webp)$/i.test(url)) {
+        preview.src = url;
+        preview.style.display = "block";
+      } else {
+        preview.style.display = "none";
+      }
+    }
+
+    async function createPromotion() {
+      const t = requireAuth(); if (!t) return;
+      if (u && u.role !== "RESTAURANT") {
+        showMsg("msg", "Acceso denegado. Rol RESTAURANT requerido.", "error");
+        return;
+      }
+
+      const btn  = document.getElementById("submit-btn");
+      const proc = document.getElementById("processing");
+      btn.disabled = true;
+      proc.style.display = "inline";
+
+      const imageUrl = document.getElementById("image_url").value.trim();
+      const payload = {
+        name:        document.getElementById("name").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        price:       parseFloat(document.getElementById("price").value),
+        stock:       parseInt(document.getElementById("stock").value),
+        valid_until: document.getElementById("valid_until").value,
+      };
+      if (imageUrl) payload.image_url = imageUrl;
+
+      const { res, data } = await apiFetch("/promotions", { method: "POST", body: payload });
+
+      proc.style.display = "none";
+
+      if (!res.ok) {
+        let errMsg = data.error || `Error ${res.status}`;
+        if (data.missing && data.missing.length) errMsg += `: falta ${data.missing.join(", ")}`;
+        if (res.status === 409 && data.existing_id) errMsg += ` (ID existente: ${data.existing_id})`;
+        showMsg("msg", errMsg, "error");
+        btn.disabled = false;
+        return;
+      }
+
+      showMsg("msg", `✓ Promoción "${data.name}" publicada correctamente.`, "success");
+      setTimeout(() => { window.location.href = "promotions.html"; }, 1400);
+    }
+  </script>
+</body>
+</html>

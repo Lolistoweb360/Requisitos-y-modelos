@@ -55,14 +55,29 @@ def ensure_users_schema_updates():
         db.session.execute(text(statement))
 
     if alter_statements:
-        db.session.commit()
+         db.session.commit()
+
+
+def ensure_promotions_schema_updates():
+    try:
+        columns_result = db.session.execute(text("PRAGMA table_info(promotions)"))
+        existing = {row[1] for row in columns_result}
+        alter_statements = []
+        if "lat" not in existing:
+            alter_statements.append("ALTER TABLE promotions ADD COLUMN lat REAL")
+        if "lng" not in existing:
+            alter_statements.append("ALTER TABLE promotions ADD COLUMN lng REAL")
+        for statement in alter_statements:
+            db.session.execute(text(statement))
+        if alter_statements:
+            db.session.commit()
+    except Exception as e:
+        print(f"⚠️  Could not migrate promotions schema: {e}")
 
 
 with app.app_context():
     db.create_all()
     ensure_users_schema_updates()
+    ensure_promotions_schema_updates()
     print("✅ Base de datos lista")
 
-
-if __name__ == "__main__":
-    app.run(debug=True, port=5001)
