@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Home – BITE-NOW</title>
+  <link rel="stylesheet" href="app.css"/>
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">BITE-NOW</div>
+      <div class="right">
+        <div class="pill" id="who">...</div>
+
+
+        <button class="btn-outline" onclick="window.location.href='promotions.html'">Ver Promociones</button> 
+
+        <button class="btn-outline" id="publish-btn" style="display:none"
+                onclick="window.location.href='publish_promotion.html'">Publicar Promoción</button>
+
+        <button class="btn-outline" onclick="window.location.href='reserve.html'">Reservar por ID</button>
+        <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 id="welcome">Home</h2>
+        <p id="subtitle">Bienvenido a BITE-NOW. Publica promociones o reserva con un ID.</p>
+        <div class="hr"></div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+         
+          <button class="btn" onclick="window.location.href='promotions.html'">
+            🏷️ Ver y Reservar Promociones
+          </button>
+  
+
+          <button class="btn" onclick="window.location.href='reserve.html'">
+            🎟️ Reservar promoción por ID
+          </button>
+
+          <button class="btn-outline" id="home-publish-btn" style="display:none"
+                  onclick="window.location.href='publish_promotion.html'">
+            ✏️ Publicar Nueva Promoción
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Estado</h2>
+        <p class="small">
+          • <b>Publicar</b> (rol RESTAURANT): crea nuevas promociones con precio, stock y vigencia.<br/><br/>
+          • <b>Reservar por ID</b>: pega el ID de la promoción para generar tu cupón.
+        </p>
+        <div id="msg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    requireAuth();
+    const u = getUser();
+    document.getElementById("welcome").textContent = `Hola, ${u?.name || "usuario"}!`;
+    document.getElementById("who").textContent = u?.role ? `Rol: ${u.role}` : "Sesión";
+    if (u?.role === "RESTAURANT") {
+      document.getElementById("publish-btn").style.display = "";
+      document.getElementById("home-publish-btn").style.display = "";
+    }
+    showMsg("msg", "Sesión activa.", "success");
+  </script>
+</body>
+</html>

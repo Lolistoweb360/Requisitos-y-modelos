@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Reservar promoción</title>
+  <link rel="stylesheet" href="app.css"/>
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">Reservar</div>
+      <div class="right">
+        <button class="btn-outline" onclick="window.location.href='home.html'">Volver</button>
+        <button class="btn-danger btn-outline" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2>US-08</h2>
+      <p>Pega el <code>promotion_id</code> (por ahora manual). Si luego hay listado, lo conectamos a un botón.</p>
+
+      <input id="promotion_id" placeholder="promotion_id (uuid)"/>
+
+      <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" onclick="reserve()">Reservar</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+      <div class="small" id="coupon"></div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    async function reserve(){
+      const t = requireAuth(); if(!t) return;
+      const promotion_id = document.getElementById("promotion_id").value.trim();
+      if(!promotion_id){
+        showMsg("msg", "promotion_id es obligatorio", "error");
+        return;
+      }
+
+      const { res, data } = await apiFetch("/reservations", { method:"POST", body:{ promotion_id } });
+
+      if(!res.ok){
+        showMsg("msg", data.error || `Error (status ${res.status})`, "error");
+        return;
+      }
+
+      showMsg("msg", "Reserva creada.", "success");
+      document.getElementById("coupon").innerHTML = `Tu cupón: <code>${data.coupon_code}</code>`;
+    }
+  </script>
+</body>
+</html>
